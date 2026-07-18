@@ -43,6 +43,12 @@
 #include <user.h>
 #include <shell.h>
 #include <kernel/lib/string.h>
+#if CONFIG_ATA
+#include <kernel/drivers/ata.h>
+#endif
+#if CONFIG_VFS
+#include <kernel/fs/vfs.h>
+#endif
 #include <limine.h>
 
 __attribute__((used, section(".limine_requests_start")))
@@ -170,6 +176,7 @@ static int vmm_smoke_test(void) {
 
 #if CONFIG_FRAMEBUFFER && CONFIG_KEYBOARD
 static void login_loop(void) {
+#if CONFIG_SHELL
     char username[USER_NAME_MAX];
     char password[USER_NAME_MAX];
 
@@ -200,6 +207,12 @@ static void login_loop(void) {
 #endif
         }
     }
+#else
+    user_t *user = user_auto_login();
+    if (user) {
+        shell_run(user);
+    }
+#endif
 }
 #endif
 
@@ -333,6 +346,28 @@ void kmain(void) {
             kfree(test);
         }
         boot_status("Kernel heap allocator", heap_ok, heap_ok ? NULL : "kmalloc returned NULL");
+    }
+#endif
+#endif
+
+#if CONFIG_ATA
+    ata_init();
+#if CONFIG_FRAMEBUFFER
+    if (fb_ok) boot_status("ATA PIO Storage Driver", 1, NULL);
+#endif
+#endif
+
+#if CONFIG_VFS
+    int vfs_ret = vfs_init();
+#if CONFIG_FRAMEBUFFER
+    if (fb_ok) {
+        if (vfs_ret == 0) {
+            boot_status("Virtual File System & InnoFS", 1, "Mounted existing FS");
+        } else if (vfs_ret == 1) {
+            boot_status("Virtual File System & InnoFS", 1, "Formatted new FS");
+        } else {
+            boot_status("Virtual File System & InnoFS", 0, "No FS found (Run mkfs)");
+        }
     }
 #endif
 #endif

@@ -11,5 +11,6 @@ int    k_strcmp(const char *a, const char *b);
 int    k_strncmp(const char *a, const char *b, size_t n);
 char  *k_strcpy(char *dst, const char *src);
 char  *k_strncpy(char *dst, const char *src, size_t n);
+char  *k_strncat(char *dst, const char *src, size_t n);
 
 #endif

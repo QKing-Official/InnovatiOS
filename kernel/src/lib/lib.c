@@ -52,7 +52,20 @@ char *k_strcpy(char *dst, const char *src) {
 
 char *k_strncpy(char *dst, const char *src, size_t n) {
     size_t i;
-    for (i = 0; i < n && src[i]; i++) dst[i] = src[i];
+    for (i = 0; i < n && src[i] != '\0'; i++) dst[i] = src[i];
     for (; i < n; i++) dst[i] = '\0';
+    return dst;
+}
+
+char *k_strncat(char *dst, const char *src, size_t n) {
+    char *d = dst;
+    while (*d != '\0') {
+        d++;
+    }
+    size_t i;
+    for (i = 0; i < n && src[i] != '\0'; i++) {
+        d[i] = src[i];
+    }
+    d[i] = '\0';
     return dst;
 }

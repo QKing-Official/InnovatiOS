@@ -23,19 +23,21 @@ while [[ $# -gt 0 ]]; do
 done
 
 
-CATEGORIES=(DRIVERS CORE PROGRAMS ADVANCED)
+CATEGORIES=(DRIVERS CORE PROGRAMS SHELL ADVANCED)
 
 declare -A CATEGORY_LABEL=(
     [DRIVERS]="Device Drivers"
     [CORE]="Kernel Core Subsystems"
     [PROGRAMS]="Userland Programs"
+    [SHELL]="Userspace Shell"
     [ADVANCED]="Advanced Options"
 )
 
 declare -A CATEGORY_FEATURES=(
     [DRIVERS]="CONFIG_SERIAL CONFIG_FRAMEBUFFER CONFIG_PIT CONFIG_KEYBOARD"
-    [CORE]="CONFIG_GDT CONFIG_INTERRUPTS CONFIG_PMM CONFIG_VMM CONFIG_HEAP CONFIG_SCHEDULER"
+    [CORE]="CONFIG_GDT CONFIG_INTERRUPTS CONFIG_PMM CONFIG_VMM CONFIG_HEAP CONFIG_SCHEDULER CONFIG_ATA CONFIG_VFS CONFIG_INNOFS"
     [PROGRAMS]="CONFIG_PROG_HELP CONFIG_PROG_WHOAMI CONFIG_PROG_USERS CONFIG_PROG_ADDUSER CONFIG_PROG_UNAME CONFIG_PROG_UPTIME CONFIG_PROG_MEMINFO CONFIG_PROG_REBOOT"
+    [SHELL]="CONFIG_SHELL CONFIG_SHELL_HISTORY CONFIG_SHELL_ECHO CONFIG_SHELL_COLORTEST CONFIG_SHELL_SUGGEST CONFIG_SHELL_SETTINGS CONFIG_SHELL_ALIAS CONFIG_SHELL_ENV CONFIG_SHELL_PREFIX_MATCH CONFIG_SHELL_THEME CONFIG_SHELL_CONFIRM_DESTRUCTIVE CONFIG_SHELL_SYSINFO CONFIG_SHELL_CALC CONFIG_SHELL_REPEAT CONFIG_SHELL_MOTD"
     [ADVANCED]="CONFIG_USER_ADDED_PROGRAMS"
 )
 
@@ -59,6 +61,9 @@ feature_label() {
         CONFIG_VMM)          echo "Virtual memory manager" ;;
         CONFIG_HEAP)         echo "Kernel heap" ;;
         CONFIG_SCHEDULER)    echo "Process scheduler" ;;
+        CONFIG_ATA)          echo "ATA PIO Storage Driver" ;;
+        CONFIG_VFS)          echo "Virtual File System (VFS)" ;;
+        CONFIG_INNOFS)       echo "InnoFS Persistent Filesystem" ;;
         CONFIG_PROG_HELP)    echo "[prog] help" ;;
         CONFIG_PROG_WHOAMI)  echo "[prog] whoami" ;;
         CONFIG_PROG_USERS)   echo "[prog] users" ;;
@@ -67,6 +72,21 @@ feature_label() {
         CONFIG_PROG_UPTIME)  echo "[prog] uptime" ;;
         CONFIG_PROG_MEMINFO) echo "[prog] meminfo" ;;
         CONFIG_PROG_REBOOT)  echo "[prog] reboot" ;;
+        CONFIG_SHELL)                    echo "Enable userspace shell" ;;
+        CONFIG_SHELL_HISTORY)            echo "[shell] command history" ;;
+        CONFIG_SHELL_ECHO)               echo "[shell] echo command" ;;
+        CONFIG_SHELL_COLORTEST)          echo "[shell] colors command" ;;
+        CONFIG_SHELL_SUGGEST)            echo "[shell] typo suggestions" ;;
+        CONFIG_SHELL_SETTINGS)           echo "[shell] set command" ;;
+        CONFIG_SHELL_ALIAS)              echo "[shell] aliases and macros" ;;
+        CONFIG_SHELL_ENV)                echo "[shell] environment variables" ;;
+        CONFIG_SHELL_PREFIX_MATCH)       echo "[shell] unambiguous prefix shortcuts" ;;
+        CONFIG_SHELL_THEME)              echo "[shell] theme command" ;;
+        CONFIG_SHELL_CONFIRM_DESTRUCTIVE) echo "[shell] confirm before reboot" ;;
+        CONFIG_SHELL_SYSINFO)            echo "[shell] sysinfo command" ;;
+        CONFIG_SHELL_CALC)               echo "[shell] calc command" ;;
+        CONFIG_SHELL_REPEAT)             echo "[shell] repeat command" ;;
+        CONFIG_SHELL_MOTD)               echo "[shell] motd command" ;;
         CONFIG_USER_ADDED_PROGRAMS) echo "User added programs" ;;
         *) echo "$1" ;;
     esac
@@ -84,6 +104,9 @@ feature_help() {
         CONFIG_VMM)          echo "Page tables, mapping and address space management." ;;
         CONFIG_HEAP)         echo "Kernel dynamic memory allocator (kmalloc/kfree)." ;;
         CONFIG_SCHEDULER)    echo "Preemptive round-robin process scheduler." ;;
+        CONFIG_ATA)          echo "Driver for legacy ATA IDE hard drives." ;;
+        CONFIG_VFS)          echo "Virtual File System abstraction layer." ;;
+        CONFIG_INNOFS)       echo "Persistent block-based filesystem for InnovatiOS." ;;
         CONFIG_PROG_HELP)    echo "Built-in 'help' shell command." ;;
         CONFIG_PROG_WHOAMI)  echo "Built-in 'whoami' shell command." ;;
         CONFIG_PROG_USERS)   echo "Built-in 'users' shell command." ;;
@@ -92,6 +115,36 @@ feature_help() {
         CONFIG_PROG_UPTIME)  echo "Built-in 'uptime' shell command." ;;
         CONFIG_PROG_MEMINFO) echo "Built-in 'meminfo' shell command." ;;
         CONFIG_PROG_REBOOT)  echo "Built-in 'reboot' shell command." ;;
+        CONFIG_SHELL)
+            echo "Master switch for the interactive userspace shell. If disabled, the login session just prints a message and does nothing else; every option below is ignored." ;;
+        CONFIG_SHELL_HISTORY)
+            echo "Keeps a ring buffer of typed commands, powers 'history', 'history find', 'history clear' and '!!'." ;;
+        CONFIG_SHELL_ECHO)
+            echo "Adds the 'echo' command that prints text back to the console." ;;
+        CONFIG_SHELL_COLORTEST)
+            echo "Adds the 'colors' command that lists the console colors this shell can use." ;;
+        CONFIG_SHELL_SUGGEST)
+            echo "When a command isn't found, suggests the closest known command by edit distance." ;;
+        CONFIG_SHELL_SETTINGS)
+            echo "Adds the 'set' command for toggling the counter, suggestions and prompt style." ;;
+        CONFIG_SHELL_ALIAS)
+            echo "Adds 'alias'/'unalias', including multi-command macros chained with ';'." ;;
+        CONFIG_SHELL_ENV)
+            echo "Adds 'export'/'unset'/'env' and \$VAR expansion, including built-ins like \$USER." ;;
+        CONFIG_SHELL_PREFIX_MATCH)
+            echo "Lets you type an unambiguous prefix of a command name to run it, e.g. 'wh' for 'whoami'." ;;
+        CONFIG_SHELL_THEME)
+            echo "Adds the 'theme' command: built-in and user-saved prompt color/symbol themes." ;;
+        CONFIG_SHELL_CONFIRM_DESTRUCTIVE)
+            echo "Makes 'reboot' ask for a yes/no confirmation before calling prog_reboot()." ;;
+        CONFIG_SHELL_SYSINFO)
+            echo "Adds 'sysinfo', which runs uname/uptime/meminfo together in one command." ;;
+        CONFIG_SHELL_CALC)
+            echo "Adds a small integer calculator: 'calc <num> <+|-|*|/> <num>'." ;;
+        CONFIG_SHELL_REPEAT)
+            echo "Adds 'repeat <count> <command>' to run a command several times in a row." ;;
+        CONFIG_SHELL_MOTD)
+            echo "Adds 'motd'/'motd set'/'motd reset' to pin a custom login tip message." ;;
         CONFIG_USER_ADDED_PROGRAMS) echo "Enable hooks for user-supplied third-party programs." ;;
         *) echo "No description available." ;;
     esac
@@ -271,6 +324,7 @@ show_category_checklist() {
     local -a feats=(${CATEGORY_FEATURES[$cat]})
     local total=${#feats[@]}
     local cursor=0
+    local scroll_offset=0
     
     while true; do
         get_dimensions
@@ -287,9 +341,14 @@ show_category_checklist() {
         echo -ne "\e[$((by+1));$((bx+2))H\e[36;40m[Space] toggle  [Enter] back  [H] help\e[0m"
         
         local list_start_y=$((by + 3))
+        local max_visible=$((bh - 4))
+        if (( max_visible < 1 )); then max_visible=1; fi
         
-        for (( i=0; i<total; i++ )); do
-            local feature="${feats[$i]}"
+        for (( i=0; i<max_visible; i++ )); do
+            local item_idx=$((scroll_offset + i))
+            if (( item_idx >= total )); then break; fi
+            
+            local feature="${feats[$item_idx]}"
             local state="[ ]"
             if [[ "${STATE[$feature]}" == y ]]; then
                 state="[*]"
@@ -298,7 +357,7 @@ show_category_checklist() {
             local label="$(feature_label "$feature")"
             local line_text=" $state $label "
             
-            if (( i == cursor )); then
+            if (( item_idx == cursor )); then
                 echo -ne "\e[$((list_start_y + i));$((bx+1))H\e[46;30m"
                 printf "%-$((bw-2))s" " $line_text"
                 echo -ne "\e[0m"
@@ -314,9 +373,11 @@ show_category_checklist() {
         case "$key" in
             "UP")
                 if (( cursor > 0 )); then cursor=$((cursor - 1)); fi
+                if (( cursor < scroll_offset )); then scroll_offset=$cursor; fi
                 ;;
             "DOWN")
                 if (( cursor < total - 1 )); then cursor=$((cursor + 1)); fi
+                if (( cursor >= scroll_offset + max_visible )); then scroll_offset=$((cursor - max_visible + 1)); fi
                 ;;
             "SPACE")
                 local feature="${feats[$cursor]}"
@@ -339,6 +400,7 @@ show_category_checklist() {
 
 main_menu() {
     local cursor=0
+    local scroll_offset=0
     local -a cats=("${CATEGORIES[@]}" "SAVE" "EXIT")
     local total=${#cats[@]}
     
@@ -357,9 +419,14 @@ main_menu() {
         echo -ne "\e[$((by+1));$((bx+2))H\e[36;40m[Enter] select  [Esc] exit  [H] help\e[0m"
         
         local list_start_y=$((by + 3))
+        local max_visible=$((bh - 4))
+        if (( max_visible < 1 )); then max_visible=1; fi
         
-        for (( i=0; i<total; i++ )); do
-            local cat="${cats[$i]}"
+        for (( i=0; i<max_visible; i++ )); do
+            local item_idx=$((scroll_offset + i))
+            if (( item_idx >= total )); then break; fi
+            
+            local cat="${cats[$item_idx]}"
             local label=""
             if [[ "$cat" == "SAVE" ]]; then
                 label="Save Configuration"
@@ -373,7 +440,7 @@ main_menu() {
             fi
             
             local line_text=" $label "
-            if (( i == cursor )); then
+            if (( item_idx == cursor )); then
                 echo -ne "\e[$((list_start_y + i));$((bx+1))H\e[46;30m"
                 printf "%-$((bw-2))s" " $line_text"
                 echo -ne "\e[0m"
@@ -389,9 +456,11 @@ main_menu() {
         case "$key" in
             "UP")
                 if (( cursor > 0 )); then cursor=$((cursor - 1)); fi
+                if (( cursor < scroll_offset )); then scroll_offset=$cursor; fi
                 ;;
             "DOWN")
                 if (( cursor < total - 1 )); then cursor=$((cursor + 1)); fi
+                if (( cursor >= scroll_offset + max_visible )); then scroll_offset=$((cursor - max_visible + 1)); fi
                 ;;
             "ENTER"|"RIGHT")
                 local cat="${cats[$cursor]}"

@@ -14,6 +14,7 @@ void prog_meminfo(user_t *user, const char *args) {
     u64 free_pg = pmm_free_pages_count();
     u64 used = total - free_pg;
 
+#if CONFIG_SERIAL
     console_puts_color("Memory Information:\n", CON_COLOR_CYAN);
     console_puts("  Total pages:  ");
     console_puts(prog_u64_to_str(total, numbuf, sizeof(numbuf)));
@@ -28,6 +29,7 @@ void prog_meminfo(user_t *user, const char *args) {
     console_puts("  Free pages:   ");
     console_puts_color(prog_u64_to_str(free_pg, numbuf, sizeof(numbuf)), CON_COLOR_GREEN);
     console_puts("\n");
+#endif
 #else
     console_puts("PMM not available.\n");
 #endif

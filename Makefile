@@ -14,6 +14,9 @@ CONFIG_PMM ?= y
 CONFIG_VMM ?= y
 CONFIG_HEAP ?= y
 CONFIG_SCHEDULER ?= y
+CONFIG_ATA ?= y
+CONFIG_VFS ?= y
+CONFIG_INNOFS ?= y
 CONFIG_PROG_HELP ?= y
 CONFIG_PROG_WHOAMI ?= y
 CONFIG_PROG_USERS ?= y
@@ -22,6 +25,21 @@ CONFIG_PROG_UNAME ?= y
 CONFIG_PROG_UPTIME ?= y
 CONFIG_PROG_MEMINFO ?= y
 CONFIG_PROG_REBOOT ?= y
+CONFIG_SHELL ?= y
+CONFIG_SHELL_HISTORY ?= y
+CONFIG_SHELL_ECHO ?= y
+CONFIG_SHELL_COLORTEST ?= y
+CONFIG_SHELL_SUGGEST ?= y
+CONFIG_SHELL_SETTINGS ?= y
+CONFIG_SHELL_ALIAS ?= y
+CONFIG_SHELL_ENV ?= y
+CONFIG_SHELL_PREFIX_MATCH ?= y
+CONFIG_SHELL_THEME ?= y
+CONFIG_SHELL_CONFIRM_DESTRUCTIVE ?= y
+CONFIG_SHELL_SYSINFO ?= y
+CONFIG_SHELL_CALC ?= y
+CONFIG_SHELL_REPEAT ?= y
+CONFIG_SHELL_MOTD ?= y
 CONFIG_USER_ADDED_PROGRAMS ?= n
 
 HAVE_CROSS_GCC := $(shell command -v $(TARGET)-gcc 2>/dev/null)
@@ -51,6 +69,9 @@ CONFIG_OPTIONS := \
 	CONFIG_VMM \
 	CONFIG_HEAP \
 	CONFIG_SCHEDULER \
+	CONFIG_ATA \
+	CONFIG_VFS \
+	CONFIG_INNOFS \
 	CONFIG_PROG_HELP \
 	CONFIG_PROG_WHOAMI \
 	CONFIG_PROG_USERS \
@@ -59,6 +80,21 @@ CONFIG_OPTIONS := \
 	CONFIG_PROG_UPTIME \
 	CONFIG_PROG_MEMINFO \
 	CONFIG_PROG_REBOOT \
+	CONFIG_SHELL \
+	CONFIG_SHELL_HISTORY \
+	CONFIG_SHELL_ECHO \
+	CONFIG_SHELL_COLORTEST \
+	CONFIG_SHELL_SUGGEST \
+	CONFIG_SHELL_SETTINGS \
+	CONFIG_SHELL_ALIAS \
+	CONFIG_SHELL_ENV \
+	CONFIG_SHELL_PREFIX_MATCH \
+	CONFIG_SHELL_THEME \
+	CONFIG_SHELL_CONFIRM_DESTRUCTIVE \
+	CONFIG_SHELL_SYSINFO \
+	CONFIG_SHELL_CALC \
+	CONFIG_SHELL_REPEAT \
+	CONFIG_SHELL_MOTD \
 	CONFIG_USER_ADDED_PROGRAMS
 
 CFLAGS := -g -O2 -pipe \
@@ -76,7 +112,7 @@ CFLAGS := -g -O2 -pipe \
           -I$(KERNEL_DIR)/include \
           -I$(USERSPACE_DIR)/include
 
-CFLAGS += $(foreach option,$(CONFIG_OPTIONS),$(if $(filter y,$($(option))),-D$(option)=1,))
+CFLAGS += $(foreach option,$(CONFIG_OPTIONS),-D$(option)=$(if $(filter y,$($(option))),1,0))
 
 LDFLAGS := -nostdlib -static -m elf_x86_64 \
            -z max-page-size=0x1000 \
@@ -97,6 +133,9 @@ CFILES += $(if $(filter y,$(CONFIG_PMM)),$(KERNEL_DIR)/src/mm/pmm.c)
 CFILES += $(if $(filter y,$(CONFIG_VMM)),$(KERNEL_DIR)/src/mm/vmm.c)
 CFILES += $(if $(filter y,$(CONFIG_HEAP)),$(KERNEL_DIR)/src/mm/heap.c)
 CFILES += $(if $(filter y,$(CONFIG_SCHEDULER)),$(KERNEL_DIR)/src/proc/scheduler.c)
+CFILES += $(if $(filter y,$(CONFIG_ATA)),$(KERNEL_DIR)/src/drivers/ata.c)
+CFILES += $(if $(filter y,$(CONFIG_VFS)),$(KERNEL_DIR)/src/fs/vfs.c)
+CFILES += $(if $(filter y,$(CONFIG_INNOFS)),$(KERNEL_DIR)/src/fs/innofs.c)
 
 USERSPACE_CFILES :=
 
@@ -196,8 +235,11 @@ iso: $(KERNEL_ELF)
 		$(ISO_DIR) -o $(ISO_NAME)
 	./limine/limine bios-install $(ISO_NAME)
 
-run: iso
-	qemu-system-x86_64 -M q35 -m 512M -cdrom $(ISO_NAME) -serial stdio
+disk.img:
+	dd if=/dev/zero of=disk.img bs=1M count=32
+
+run: iso disk.img
+	qemu-system-x86_64 -M q35 -m 512M -cdrom $(ISO_NAME) -device piix3-ide,id=ide -drive id=disk,file=disk.img,if=none,format=raw -device ide-hd,drive=disk,bus=ide.0 -serial stdio
 
 clean:
 	rm -rf $(BUILD_DIR) $(ISO_NAME) $(ISO_DIR)

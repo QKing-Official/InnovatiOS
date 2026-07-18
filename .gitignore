@@ -28,3 +28,6 @@ iso_root/
 !limine.conf
 !InnovatiOS.png
 !limine/
+
+scratch.py
+LATER.md

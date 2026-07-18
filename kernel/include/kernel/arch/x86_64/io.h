@@ -17,4 +17,22 @@ static inline void io_wait(void) {
     outb(0x80, 0);
 }
 
+static inline u16 inw(u16 port) {
+    u16 ret;
+    __asm__ volatile ("inw %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+static inline void outw(u16 port, u16 val) {
+    __asm__ volatile ("outw %0, %1" : : "a"(val), "Nd"(port));
+}
+
+static inline void insw(u16 port, void *addr, u32 count) {
+    __asm__ volatile ("rep insw" : "+D"(addr), "+c"(count) : "d"(port) : "memory");
+}
+
+static inline void outsw(u16 port, const void *addr, u32 count) {
+    __asm__ volatile ("rep outsw" : "+S"(addr), "+c"(count) : "d"(port) : "memory");
+}
+
 #endif

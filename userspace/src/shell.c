@@ -1251,7 +1251,7 @@ static const shell_cmd_t commands[] = {
 #endif
 #endif
 #if CONFIG_USER_ADDED_PROGRAMS
-    { "matrix",   prog_matrix,  "Run the matrix screensaver",              0 },
+    USER_PROGRAMS_LIST
 #endif
 #if CONFIG_VFS
     { "mkfs",     cmd_mkfs,     "Format the persistent disk (InnoFS)",     1 },

@@ -188,6 +188,12 @@ $(GEN_USER_PROGS_H): FORCE
 ifeq ($(CONFIG_USER_ADDED_PROGRAMS),y)
 	@$(foreach p,$(patsubst $(USERSPACE_DIR)/programs/%.c,%,$(USER_ADDED_PROGS_C)), \
 		echo "void prog_$(p)(user_t *user, const char *args);" >> $@.tmp;)
+	@echo "#define USER_PROGRAMS_LIST \\" >> $@.tmp
+	@$(foreach p,$(patsubst $(USERSPACE_DIR)/programs/%.c,%,$(USER_ADDED_PROGS_C)), \
+		echo "    { \"$(p)\", prog_$(p), \"User program $(p)\", 0 }, \\" >> $@.tmp;)
+	@echo "    /* end */" >> $@.tmp
+else
+	@echo "#define USER_PROGRAMS_LIST" >> $@.tmp
 endif
 	@cmp -s $@ $@.tmp || mv $@.tmp $@
 	@rm -f $@.tmp

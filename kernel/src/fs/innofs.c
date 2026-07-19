@@ -93,10 +93,10 @@ static void bitmap_free_sector(u32 sector) {
 }
 
 static bool check_access(struct innofs_dirent *dirent, u16 uid) {
-    if (uid == 0) return true; // root always has access
-    if (dirent->flags & 0x02) return false; // root only
-    if (dirent->flags & 0x04) return (dirent->owner_uid == uid); // owner only
-    return true; // public
+    if (uid == 0) return true;
+    if (dirent->flags & 0x02) return false;
+    if (dirent->flags & 0x04) return (dirent->owner_uid == uid);
+    return true;
 }
 
 static int split_path(const char *path, char *parent_dir, char *filename) {

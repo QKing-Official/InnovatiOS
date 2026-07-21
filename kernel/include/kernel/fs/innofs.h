@@ -4,6 +4,12 @@
 #include <kernel/fs/vfs.h>
 #include <kernel/types.h>
 
+// This is the InnoFS header file
+// This file contains the methods that can be called to interact with this filesystem
+// InnoFS is different from other major filesystems in that it is a very simple filesystem that is designed to be used in
+// my special, selfwritten operating system called InnovatiOS
+// This FS is not disigned to be used for real purposes, this is just a hobby filesystem that I have made for stardance hackclub
+
 int innofs_init(void);
 int innofs_mkfs(void);
 int innofs_open(const char *name, int mode, u16 uid);

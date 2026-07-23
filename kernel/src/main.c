@@ -1,3 +1,9 @@
+// Main kernel and boot sequence for InnovatiOS
+// This file contains the entry point for the kernel, kmain(), and the boot sequence
+// It initializes various subsystems, including serial, framebuffer, GDT, IDT, PIC, PIT, keyboard,
+// PMM, VMM, heap, ATA, and VFS. It also handles the login loop and shell execution.
+// This file itself does not contain any features that can be used by other parts of the kernel.
+
 #include <kernel/types.h>
 
 #if CONFIG_SERIAL

@@ -2,6 +2,8 @@
 #include <kernel/arch/x86_64/io.h>
 #include <kernel/arch/x86_64/pic.h>
 
+
+// Port to use for keyboard in hex
 #define KB_DATA_PORT 0x60
 #define KB_BUFFER_SIZE 256
 
@@ -22,6 +24,7 @@ static volatile int extended = 0;
 
 static volatile int pause_seq_remaining = 0;
 
+// Scancodes for the ASCII characters and their capitalized version for shift/capslock
 
 static const char scancode_ascii[128] = {
     0,   27,  '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b', '\t',
@@ -34,6 +37,7 @@ static const char scancode_ascii[128] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
 };
 
+// Shifted versions here....
 static const char scancode_ascii_shift[128] = {
     0,   27,  '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b', '\t',
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '\n', 0,   'A', 'S',
@@ -48,17 +52,18 @@ static const char scancode_ascii_shift[128] = {
 #define NUMPAD_SC_BASE 0x47
 #define NUMPAD_SC_LAST 0x53
 
+// Numpad is weird
 static const char numpad_ascii[NUMPAD_SC_LAST - NUMPAD_SC_BASE + 1] = {
     '7', '8', '9', '-', '4', '5', '6', '+', '1', '2', '3', '0', '.',
 };
-
+// Numpad for when numlock is off
 static const keycode_t numpad_nav[NUMPAD_SC_LAST - NUMPAD_SC_BASE + 1] = {
     KEY_HOME, KEY_UP,   KEY_PAGE_UP, 0 ,
     KEY_LEFT, 0 , KEY_RIGHT,  0 ,
     KEY_END,  KEY_DOWN, KEY_PAGE_DOWN, KEY_INSERT, KEY_DELETE,
 };
 
-
+// Some hex keycoded that define the ASCII characters and key
 #define SC_LSHIFT     0x2A
 #define SC_RSHIFT     0x36
 #define SC_LCTRL      0x1D
@@ -135,6 +140,7 @@ u8 keyboard_get_modifiers(void) {
     return mods;
 }
 
+// Translator for the keyboard special characters
 static char translate_normal_key(u8 code) {
     char base = scancode_ascii[code];
     if (base == 0) return 0;
@@ -154,6 +160,7 @@ static char translate_normal_key(u8 code) {
     return c;
 }
 
+// Handle a normal scancode
 static void handle_normal(u8 code, int is_break) {
     switch (code) {
         case SC_LSHIFT:
@@ -227,6 +234,7 @@ static void handle_normal(u8 code, int is_break) {
     }
 }
 
+// Extended scancode handling for special keys
 static void handle_extended(u8 code, int is_break) {
     switch (code) {
         case SCE_RCTRL:
@@ -268,6 +276,7 @@ static void handle_extended(u8 code, int is_break) {
     }
 }
 
+// Interrupt handler for the keyboard IRQ
 void keyboard_handle_irq(void) {
     u8 sc = inb(KB_DATA_PORT);
 

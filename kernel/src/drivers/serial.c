@@ -1,3 +1,14 @@
+// Extensive serial port driver for InnovatiOS
+// All features in this driver are listed:
+// - Support for multiple serial ports (COM1, COM2, COM3, COM4)
+// - Configurable baud rate, data bits, stop bits, and parity
+// - Optional hardware flow control (RTS/CTS)
+// - Interrupt-driven I/O for both transmission and reception
+// - Ring buffer implementation for both TX and RX
+// - Statistics tracking for transmitted and received bytes, overruns, framing errors, parity errors,
+//   and break events
+// - Thread-safe access to serial ports using spinlocks
+
 #include <kernel/drivers/serial.h>
 #include <stdint.h>
 
